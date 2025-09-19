@@ -28,27 +28,13 @@ It helps server developers and administrators to follow NPC Action IDs, next cha
 ---
 
 ## 🚀 How to Use
-1. Launch `TraceDatababeOld4.exe` (merged single EXE).
+1. Launch `TraceDatabaseOldEO.exe` (merged single EXE).
 2. Enter MySQL connection details (host, port, username, password).
 3. Click **Connect** to connect to MySQL 4.0.
 4. Select the target database.
 5. Enter the **NPC Action ID** to trace.
 6. Click **Trace Action** → SQL output will appear.
 7. Use **Copy All** to copy results.
-
----
-
-## 📂 Build Notes (for developers)
-- Build in **Release | x64**.
-- ILMerge creates `TraceDatabaseOldEO.exe` in `dist/` folder.
-- Ensure `MySql.Data.dll` path in `.csproj` points to the correct DLL.
-
----
-
-## ⚠️ Troubleshooting
-- **Empty trace** → check `cq_action` table has data.
-- **Connection failed** → MySQL 4.0 only, no SSL, user must have DB access.
-- **ILMerge error** → verify ILMerge path and version.
 
 ---
 
