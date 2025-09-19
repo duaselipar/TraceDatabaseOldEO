@@ -1,6 +1,6 @@
 # TraceDatabaseOldEO
 
-**TraceDatababeOld4** is a Windows Forms tool for tracing `cq_action` (and appending related `cq_task`) records from an **Eudemons Online private server** running **MySQL 4.0.x**.  
+**TraceDatabaseOldEO** is a Windows Forms tool for tracing `cq_action` (and appending related `cq_task`) records from an **Eudemons Online private server** running **MySQL 4.0.x**.  
 It helps server developers and administrators to follow NPC Action IDs, next chains, and generate SQL outputs quickly.
 
 ---
@@ -40,7 +40,7 @@ It helps server developers and administrators to follow NPC Action IDs, next cha
 
 ## 📂 Build Notes (for developers)
 - Build in **Release | x64**.
-- ILMerge creates `TraceDatababeOld4-merged.exe` in `dist/` folder.
+- ILMerge creates `TraceDatabaseOldEO.exe` in `dist/` folder.
 - Ensure `MySql.Data.dll` path in `.csproj` points to the correct DLL.
 
 ---
