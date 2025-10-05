@@ -12,6 +12,9 @@ namespace TraceDatababeOld4
 {
     public partial class MainForm : Form
     {
+
+        private static readonly Encoding Gbk = Encoding.GetEncoding(936); // GBK/CP936
+
         private MySqlConnection _conn;
         private string _host, _user, _pass, _selectedDb;
 
@@ -53,10 +56,11 @@ namespace TraceDatababeOld4
             uint.TryParse(txtPort.Text.Trim(), out port);
 
             var sb = new StringBuilder();
-            sb.AppendFormat("Server={0};Port={1};User Id={2};Password={3};", host, port, user, pass);
+            sb.AppendFormat("Server={0};Port={1};User Id={2};Password={3};CharSet=gbk;", host, port, user, pass);
             if (!IsNullOrWhite(db)) sb.AppendFormat("Database={0};", db);
-            return sb.ToString(); // keep it plain for MySQL 4.0
+            return sb.ToString(); // simple utk MySQL 4.0 + Connector lama
         }
+
 
         // ---- UI handlers ------------------------------------------------------
 
@@ -92,6 +96,7 @@ namespace TraceDatababeOld4
             {
                 _conn = new MySqlConnection(ConnStr(_host, _user, _pass, null));
                 _conn.Open();
+                InitSessionEncoding(); // <<< tambah baris ni
 
                 using (var cmd = (MySqlCommand)_conn.CreateCommand())
                 {
@@ -137,6 +142,7 @@ namespace TraceDatababeOld4
                 if (_conn != null) { try { _conn.Close(); } catch { } _conn.Dispose(); }
                 _conn = new MySqlConnection(ConnStr(_host, _user, _pass, db));
                 _conn.Open();
+                InitSessionEncoding(); // <<< tambah baris ni
 
                 _selectedDb = db;
                 txtNpcActionId.Enabled = true;
@@ -248,7 +254,6 @@ namespace TraceDatababeOld4
         private string SqlLit(object v)
         {
             if (v == null || v == DBNull.Value) return "NULL";
-
             switch (Type.GetTypeCode(v.GetType()))
             {
                 case TypeCode.Boolean: return ((bool)v) ? "1" : "0";
@@ -265,13 +270,14 @@ namespace TraceDatababeOld4
                 case TypeCode.Single:
                     return Convert.ToString(v, System.Globalization.CultureInfo.InvariantCulture);
                 case TypeCode.DateTime:
-                    return "'" + ((DateTime)v).ToString("yyyy-MM-dd HH:mm:ss") + "'";
+                    return "'" + ((DateTime)v).ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture) + "'";
                 default:
                     string s = v.ToString() ?? "";
                     s = s.Replace("\\", "\\\\").Replace("'", "\\'");
                     return "'" + s + "'";
             }
         }
+
 
         // ---- misc -------------------------------------------------------------
 
@@ -453,5 +459,34 @@ namespace TraceDatababeOld4
 
             return sb.ToString();
         }
+
+        private void InitSessionEncoding()
+        {
+            try
+            {
+                using (var cmd = (MySqlCommand)_conn.CreateCommand())
+                {
+                    cmd.CommandText = "SET NAMES gbk";
+                    cmd.ExecuteNonQuery();
+
+                    // opsyen tambahan (sesetengah build lama suka explicit)
+                    try { cmd.CommandText = "SET character_set_results=gbk"; cmd.ExecuteNonQuery(); } catch { }
+                }
+            }
+            catch { /* jika build 4.0 tertentu tak support, biar CharSet handle */ }
+        }
+
+        private void BtnSaveGbk(object s, EventArgs e)
+        {
+            using (var dlg = new SaveFileDialog { Filter = "SQL File|*.sql", FileName = "trace.sql" })
+            {
+                if (dlg.ShowDialog(this) == DialogResult.OK)
+                {
+                    System.IO.File.WriteAllText(dlg.FileName, rtbOutput.Text, Gbk);
+                    MessageBox.Show("Saved as GBK (936).");
+                }
+            }
+        }
+
     }
 }
